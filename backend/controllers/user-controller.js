@@ -105,7 +105,45 @@ const getUser = async (req, res, next) => {
   });
 };
 
+const refreshToken = (user) => {
+  const cookies = req.headers.cookies;
+  const prevToken = cookies.split("=")[1];
+  if (!prevToken) {
+    return res.status(401).json({
+      message: "Token not found",
+    });
+  }
+  jwt.verify(String(prevToken), "secret_key", (err, user) => {
+    if (err) {
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+    res.clearCookie(String(user._id));
+    req.cookies[`${user._id}`] = "";
+    const token = jwt.sign(
+      {
+        id: user._id,
+      },
+      "secret_key",
+      {
+        expiresIn: "1hr",
+      }
+    );
+    res.cookie(String(user._id), token, {
+      path: "/",
+      httpOnly: true,
+      maxAge: 3600000,
+      expiresIn: new Date(Date.now() + 3600000),
+      sameSite: "lax",
+    });
+    req.id = user._id;
+    next();
+  });
+};
+
 exports.signup = signup;
 exports.login = login;
 exports.verifyToken = verifyToken;
 exports.getUser = getUser;
+exports.refreshToken = refreshToken;
