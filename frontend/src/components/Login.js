@@ -28,7 +28,7 @@ const Login = () => {
         e.preventDefault();
         const data = await sendRequest();
         if (data.success) {
-          navigate("/login");
+          navigate("/user");
         }
       };
     
