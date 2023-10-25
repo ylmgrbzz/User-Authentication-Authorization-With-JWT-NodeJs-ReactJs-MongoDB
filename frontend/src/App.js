@@ -19,7 +19,7 @@ function App() {
         </header>
         <main>
           <Routes>
-            <Route exact path="/user" element={<Welcome />} />
+            {isLoggedIn && <Route exact path="/user" element={<Welcome />} />}{" "}
             <Route path="/login" element={<Login />} />
             <Route path="/signup" element={<Signup />} />
           </Routes>

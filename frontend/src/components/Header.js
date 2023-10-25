@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { AppBar, Box, Tab, Tabs, Toolbar, Typography } from "@mui/material";
 import { Link } from "react-router-dom";
-import { useSelector,useDispatch } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import axios from "axios";
 import { authActions } from "../store/index";
 
@@ -23,10 +23,9 @@ const Header = () => {
     }
   };
 
-  const handleLogout =  () => {
-    sendLogoutReq().then(() => 
-      dispatch(authActions.logout()));
-  }; 
+  const handleLogout = () => {
+    sendLogoutReq().then(() => dispatch(authActions.logout()));
+  };
 
   return (
     <div>
@@ -40,8 +39,13 @@ const Header = () => {
               value={value}
               textColor="inherit"
             >
-              <Tab to="/login" LinkComponent={Link} label="Login" />
-              <Tab to="/signup" LinkComponent={Link} label="SignUp" />
+              {!isLoggedIn && (
+                <>
+                  {" "}
+                  <Tab to="/login" LinkComponent={Link} label="Login" />
+                  <Tab to="/signup" LinkComponent={Link} label="SignUp" />
+                </>
+              )}
               {isLoggedIn && (
                 <Tab
                   onClick={handleLogout}
@@ -56,7 +60,6 @@ const Header = () => {
       </AppBar>
     </div>
   );
-}; 
+};
 
 export default Header;
-
