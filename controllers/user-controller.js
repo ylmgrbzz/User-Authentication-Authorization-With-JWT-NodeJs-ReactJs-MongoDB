@@ -28,41 +28,48 @@ const signup = async (req, res, next) => {
 };
 
 const login = async (req, res, next) => {
-  const { email, password } = req.body;
-  try {
-    const user = await User.findOne({ email: email });
-    if (!user) {
-      return res.status(401).json({
-        message: "Invalid email or password",
+    const { email, password } = req.body;
+    try {
+      const user = await User.findOne({ email: email });
+      if (!user) {
+        return res.status(401).json({
+          message: "Invalid email or password",
+        });
+      }
+      const isPasswordValid = await bcrypt.compareSync(password, user.password);
+      if (!isPasswordValid) {
+        return res.status(401).json({
+          message: "Invalid email or password",
+        });
+      }
+      const token = jwt.sign({ id: user._id }, "secret_key", {
+        expiresIn: "1hr",
       });
-    }
-    const isPasswordValid = await bcrypt.compareSync(password, user.password);
-    if (!isPasswordValid) {
-      return res.status(401).json({
-        message: "Invalid email or password",
+      res.cookie(String(user._id), token, {
+        path: "/",
+        httpOnly: true,
+        maxAge: 3600000,
+        expiresIn: new Date(Date.now() + 3600000),
+        sameSite: "lax",
       });
+      res.status(200).json({
+        message: "Login successful",
+        user: user,
+        token: token,
+      });
+    } catch (error) {
+      next(error);
     }
-    const token = jwt.sign({ id: user._id }, "secret_key", {
-      expiresIn: "1hr",
-    });
-    res.status(200).json({
-      message: "Login successful",
-      user: user,
-      token: token,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
+  };
+  
 const verifyToken = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  if (!authHeader) {
+    const cookies = req.headers.cookies;
+  if (!cookies) {
     return res.status(401).json({
-      message: "Authorization header not found",
+      message: "cookies header not found",
     });
   }
-  const token = authHeader.split(" ")[1];
+  const token = cookies.split("=")[1];
   if (!token) {
     return res.status(401).json({
       message: "Token not found",
