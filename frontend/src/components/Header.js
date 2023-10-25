@@ -18,6 +18,7 @@ const Header = () => {
             >
               <Tab to="/login" LinkComponent={Link} label="Login" />
               <Tab to="/signup" LinkComponent={Link} label="SignUp" />
+              <Tab to="/logout" LinkComponent={Link} label="logout" />
             </Tabs>
           </Box>
         </Toolbar>

@@ -45,6 +45,10 @@ const login = async (req, res, next) => {
     const token = jwt.sign({ id: user._id }, "secret_key", {
       expiresIn: "1hr",
     });
+    if (req.cookies[`${user._id}`]) {
+      res.clearCookie(String(user._id));
+    }
+
     res.cookie(String(user._id), token, {
       path: "/",
       httpOnly: true,
