@@ -55,5 +55,50 @@ const login = async (req, res, next) => {
   }
 };
 
+const verifyToken = (req, res, next) => {
+  const authHeader = req.headers.authorization;
+  if (!authHeader) {
+    return res.status(401).json({
+      message: "Authorization header not found",
+    });
+  }
+  const token = authHeader.split(" ")[1];
+  if (!token) {
+    return res.status(401).json({
+      message: "Token not found",
+    });
+  }
+  jwt.verify(String(token), "secret_key", (err, decodedToken) => {
+    if (err) {
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+    req.userId = decodedToken.id;
+  });
+  next();
+};
+
+const getUser = async (req, res, next) => {
+  const userId = req.userId;
+  let user;
+  try {
+    user = await User.findById(userId);
+  } catch (error) {
+    return new Error(error);
+  }
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+  res.status(200).json({
+    message: "User found",
+    user: user,
+  });
+};
+
 exports.signup = signup;
 exports.login = login;
+exports.verifyToken = verifyToken;
+exports.getUser = getUser;
