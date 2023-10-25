@@ -146,8 +146,32 @@ const refreshToken = (user) => {
   });
 };
 
+const logout = async (req, res, next) => {
+  const cookies = req.headers.cookies;
+  const prevToken = cookies.split("=")[1];
+  if (!prevToken) {
+    return res.status(401).json({
+      message: "Token not found",
+    });
+  }
+  jwt.verify(String(prevToken), "secret_key", (err, user) => {
+    if (err) {
+      console.log(err);
+      return res.status(401).json({
+        message: "Invalid or expired token",
+      });
+    }
+    res.clearCookie(String(user._id));
+    req.cookies[`${user._id}`] = "";
+    res.status(200).json({
+      message: "Logout successful",
+    });
+  });
+};
+
 exports.signup = signup;
 exports.login = login;
 exports.verifyToken = verifyToken;
 exports.getUser = getUser;
 exports.refreshToken = refreshToken;
+exports.logout = logout;
